@@ -1,10 +1,12 @@
 """
 Importing:
+os for runing the clear command
 json for read api responses
 time for sleeping
 requests for the actual rest client
 yaml for rading the external config file
 """
+import os
 import json
 import time
 import requests
@@ -27,7 +29,6 @@ OPTIONS_DICTIONARY = {
 try:
     with open('config.yaml', encoding='UTF-8') as config_file:
         config = yaml.load(config_file, Loader=yaml.FullLoader)
-
 except IOError:
     print("There was an error opening the config file")
     exit()
@@ -35,6 +36,16 @@ except IOError:
 api_base_url = config['api_base_url']
 api_version = config['API_VERSION']
 api_key = config['API_KEY']
+
+
+def clear_screen():
+    """
+    We clean the screen if the program starts over
+    """
+    if os.name == 'posix':
+        _ = os.system('clear')
+    else:
+        _ = os.system('cls')
 
 
 def select_info():
@@ -80,6 +91,11 @@ def main():
     to make it easier to restart it at the end
     in case you select yes to the restart question
     """
+    print("######################")
+    print("###    Welcome.    ###")
+    print("######################\n")
+    print("I can tell you some info about any movie in the themoviedb.org website\n")
+
     print("Which method would you like to use to seach it?\nSelect an option:\n")
     while True:
         print("1 - By ID")
@@ -112,13 +128,22 @@ def main():
                 print("Please, insert a number, not a text")
 
     ep_path = f"/movie/{movie_id}"
-    endpoint = f"{api_base_url}{ep_path}?api_key={api_key}"
+    endpoint = f"{api_base_url}{api_version}{ep_path}?api_key={api_key}"
     req_id = requests.get(endpoint)
     result_as_json = json.loads(req_id.text)
 
     if req_id.status_code != 200:
+        restarting = "The program is restarting now"
+        wait = 0
         print("\nThere was an error when making the request. The error was:")
-        print("\"" + result_as_json['status_message'] + "\"\n")
+        print("\"" + result_as_json['status_message'] + "\"\n\n")
+        print(restarting)
+        while wait < 5:
+            time.sleep(0.3)
+            print(wait*'.')
+            wait = wait + 1
+        clear_screen()
+        main()
     else:
         if search_by == "ID":
             time.sleep(0.5)
@@ -139,14 +164,12 @@ def main():
 
     restart = input("\nDo you want to start again? (yes/y)\n").lower()
     if restart in yeslist:
+        clear_screen()
         main()
     else:
         print("That was fun! Until the next time!.\nBye!")
+        clear_screen()
         exit()
 
 
-print("######################")
-print("###    Welcome.    ###")
-print("######################\n")
-print("I can tell you some info about any movie in the themoviedb.org website\n")
 main()

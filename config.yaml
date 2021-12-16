@@ -1,4 +1,4 @@
 ---
-API_KEY = "2576fa406a5574631d87c0b2567cb6a2"
-API_VERSION = 3
-api_base_url = "https://api.themoviedb.org/
+API_KEY : "2576fa406a5574631d87c0b2567cb6a2"
+API_VERSION : "3"
+api_base_url : "https://api.themoviedb.org/"
