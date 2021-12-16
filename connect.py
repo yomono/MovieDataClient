@@ -1,10 +1,17 @@
+"""
+Importing:
+json for read api responses
+time for sleeping
+requests for the actual rest client
+yaml for rading the external config file
+"""
 import json
-import requests
 import time
+import requests
 import yaml
 
 
-# CONSTS and VARS
+# some CONSTS and VARS
 yeslist = ["yes", "y"]
 OPTIONS_DICTIONARY = {
     1: 'release_date',
@@ -14,16 +21,26 @@ OPTIONS_DICTIONARY = {
     5: 'vote_average',
     6: 'all'
 }
-#####
+
+
+# Opening Config file. If not possible, the program exits
 try:
-    with open('config.yaml') as config_file:
+    with open('config.yaml', encoding='UTF-8') as config_file:
         config = yaml.load(config_file, Loader=yaml.FullLoader)
+
 except IOError:
     print("There was an error opening the config file")
     exit()
 
+api_base_url = config['api_base_url']
+api_version = config['API_VERSION']
+api_key = config['API_KEY']
+
 
 def select_info():
+    """
+    Used for selecting what info do you want, after inputing the movie name or ID
+    """
     possible_options = ["1 - Release date",
                         "2 - Its IMDB ID",
                         "3 - What is the genre",
@@ -47,6 +64,9 @@ def select_info():
 
 
 def query_by_id(endpoint):
+    """
+    To convert movie name to movie ID, which we actually use in the detailed info request
+    """
     req_name = requests.get(endpoint)
     req_name_as_json = json.loads(req_name.text)
     results = req_name_as_json['results']
@@ -55,6 +75,11 @@ def query_by_id(endpoint):
 
 
 def main():
+    """
+    Actual program. It's inside a main function
+    to make it easier to restart it at the end
+    in case you select yes to the restart question
+    """
     print("Which method would you like to use to seach it?\nSelect an option:\n")
     while True:
         print("1 - By ID")
@@ -75,7 +100,7 @@ def main():
     if search_by == "Name":
         movie_name = input("Input the movie name:\n")
         ep_path = "/search/movie"
-        endpoint = f"{api_base_url}{API_VERSION}{ep_path}?api_key={API_KEY}&query={movie_name}"
+        endpoint = f"{api_base_url}{api_version}{ep_path}?api_key={api_key}&query={movie_name}"
         movie_id = query_by_id(endpoint)
     else:
         while True:
@@ -87,7 +112,7 @@ def main():
                 print("Please, insert a number, not a text")
 
     ep_path = f"/movie/{movie_id}"
-    endpoint = f"{api_base_url}{ep_path}?api_key={API_KEY}"
+    endpoint = f"{api_base_url}{ep_path}?api_key={api_key}"
     req_id = requests.get(endpoint)
     result_as_json = json.loads(req_id.text)
 
